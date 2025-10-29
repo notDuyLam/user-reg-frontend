@@ -22,6 +22,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import { loginUser, type ErrorResponse } from "@/lib/api";
+import { AxiosError } from "axios";
+import { parseApiError } from "@/lib/utils";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { loginSchema, type LoginFormData } from "@/lib/validations";
 
 export default function LoginPage() {
@@ -37,20 +42,38 @@ export default function LoginPage() {
     },
   });
 
+  const mutation = useMutation({
+    mutationFn: (payload: LoginFormData) => loginUser(payload),
+    onSuccess: () => {
+      form.reset();
+      setSuccessMessage("Login successful! Redirecting...");
+      setTimeout(() => {
+        router.push("/users");
+      }, 1000);
+    },
+    onError: (error: AxiosError<ErrorResponse>) => {
+      const parsed = parseApiError(error);
+      if (parsed.fieldErrors.email) {
+        form.setError("email", {
+          type: "server",
+          message: parsed.fieldErrors.email,
+        });
+      }
+      if (parsed.fieldErrors.password) {
+        form.setError("password", {
+          type: "server",
+          message: parsed.fieldErrors.password,
+        });
+      }
+      form.setError("root", { type: "server", message: parsed.userMessage });
+    },
+    onSettled: () => setIsSubmitting(false),
+  });
+
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
     setSuccessMessage(null);
-
-    // Simulate API call delay
-    setTimeout(() => {
-      setSuccessMessage("Login successful! Redirecting...");
-      form.reset();
-
-      // Simulate redirect after 2 seconds
-      setTimeout(() => {
-        router.push("/");
-      }, 2000);
-    }, 500);
+    mutation.mutate(data);
   };
 
   return (
@@ -67,9 +90,25 @@ export default function LoginPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {form.formState.errors.root && (
+                <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300">
+                  <AlertCircle className="h-4 w-4 mt-0.5" />
+                  <div>
+                    <div className="font-medium">There was a problem</div>
+                    <div className="text-sm">
+                      {form.formState.errors.root.message}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {successMessage && (
-                <div className="text-sm text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 p-3 rounded-md">
-                  {successMessage}
+                <div className="flex items-start gap-2 rounded-md border border-green-200 bg-green-50 p-3 text-green-700 dark:border-green-900/40 dark:bg-green-950/30 dark:text-green-300">
+                  <CheckCircle2 className="h-4 w-4 mt-0.5" />
+                  <div>
+                    <div className="font-medium">Success</div>
+                    <div className="text-sm">{successMessage}</div>
+                  </div>
                 </div>
               )}
 

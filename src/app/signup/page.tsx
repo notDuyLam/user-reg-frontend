@@ -25,14 +25,10 @@ import {
 } from "@/components/ui/form";
 import Link from "next/link";
 import { registerSchema, type RegisterFormData } from "@/lib/validations";
-import { registerUser } from "@/lib/api";
+import { registerUser, type ErrorResponse } from "@/lib/api";
 import { AxiosError } from "axios";
-
-interface ErrorResponse {
-  statusCode?: number;
-  message: string | string[];
-  error?: string;
-}
+import { parseApiError } from "@/lib/utils";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -56,50 +52,20 @@ export default function SignUpPage() {
       }, 2000);
     },
     onError: (error: AxiosError<ErrorResponse>) => {
-      if (error.response?.status === 409) {
+      const parsed = parseApiError(error);
+      if (parsed.fieldErrors.email) {
         form.setError("email", {
           type: "server",
-          message: "This email is already registered. Please log in instead.",
-        });
-      } else if (error.response?.status === 400) {
-        const message = error.response.data.message;
-        if (Array.isArray(message)) {
-          // Handle multiple validation errors
-          if (message.some((m) => m.includes("email"))) {
-            form.setError("email", {
-              type: "server",
-              message: "Please provide a valid email address",
-            });
-          }
-          if (message.some((m) => m.includes("Password"))) {
-            form.setError("password", {
-              type: "server",
-              message:
-                message.find((m) => m.includes("Password")) ||
-                "Invalid password",
-            });
-          }
-        } else {
-          form.setError("root", {
-            type: "server",
-            message: typeof message === "string" ? message : "Validation error",
-          });
-        }
-      } else if (error.response?.status === 500) {
-        form.setError("root", {
-          type: "server",
-          message: "Server error. Please try again later.",
-        });
-      } else {
-        const message = error.response?.data.message;
-        form.setError("root", {
-          type: "server",
-          message:
-            typeof message === "string"
-              ? message
-              : "Registration failed. Please try again.",
+          message: parsed.fieldErrors.email,
         });
       }
+      if (parsed.fieldErrors.password) {
+        form.setError("password", {
+          type: "server",
+          message: parsed.fieldErrors.password,
+        });
+      }
+      form.setError("root", { type: "server", message: parsed.userMessage });
     },
   });
 
@@ -123,14 +89,24 @@ export default function SignUpPage() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {form.formState.errors.root && (
-                <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 p-3 rounded-md">
-                  {form.formState.errors.root.message}
+                <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300">
+                  <AlertCircle className="h-4 w-4 mt-0.5" />
+                  <div>
+                    <div className="font-medium">There was a problem</div>
+                    <div className="text-sm">
+                      {form.formState.errors.root.message}
+                    </div>
+                  </div>
                 </div>
               )}
 
               {successMessage && (
-                <div className="text-sm text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 p-3 rounded-md">
-                  {successMessage}
+                <div className="flex items-start gap-2 rounded-md border border-green-200 bg-green-50 p-3 text-green-700 dark:border-green-900/40 dark:bg-green-950/30 dark:text-green-300">
+                  <CheckCircle2 className="h-4 w-4 mt-0.5" />
+                  <div>
+                    <div className="font-medium">Success</div>
+                    <div className="text-sm">{successMessage}</div>
+                  </div>
                 </div>
               )}
 
