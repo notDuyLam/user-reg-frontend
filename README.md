@@ -1,36 +1,161 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# User Registration Frontend
+
+A modern user registration system built with Next.js 16, featuring React Hook Form validation, React Query for state management, and shadcn/ui components.
+
+## Features
+
+- 🎨 **Modern UI**: Built with shadcn/ui components and Tailwind CSS
+- ✅ **Form Validation**: React Hook Form with Zod schema validation
+- 🔄 **API Integration**: React Query for efficient API state management
+- 📱 **Responsive Design**: Mobile-first responsive layout
+- 🚀 **Ready for Deployment**: Configured for Vercel deployment
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **UI Components**: shadcn/ui + Radix UI
+- **Styling**: Tailwind CSS
+- **Form Handling**: React Hook Form
+- **Validation**: Zod
+- **API Client**: React Query + Axios
+- **TypeScript**: Full type safety
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ installed
+- Backend API running (see `API_DOCUMENTATION.md`)
+
+### Installation
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Configure environment variables:
+
+Copy `.env.example` to `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+Or create `.env.local` with:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+3. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── layout.tsx          # Root layout with providers
+│   ├── page.tsx             # Home/landing page
+│   ├── login/
+│   │   └── page.tsx         # Login page
+│   └── signup/
+│       └── page.tsx         # Sign up page
+├── components/
+│   └── ui/                  # shadcn/ui components
+├── config/
+│   └── env.ts               # Environment configuration
+├── lib/
+│   ├── api.ts               # API client (Axios)
+│   ├── utils.ts             # Utility functions
+│   └── validations.ts       # Zod schemas
+└── providers/
+    └── query-provider.tsx   # React Query provider
+```
 
-## Learn More
+## Available Scripts
 
-To learn more about Next.js, take a look at the following resources:
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Integration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The frontend connects to a NestJS backend API. See `API_DOCUMENTATION.md` for complete API documentation.
 
-## Deploy on Vercel
+### Environment Configuration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+To change the API URL:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Development**: Edit `.env.local`
+2. **Production**: Set `NEXT_PUBLIC_API_URL` in Vercel environment variables
+
+## Deployment
+
+### Deploy to Vercel
+
+1. Push your code to GitHub
+2. Import project in [Vercel](https://vercel.com)
+3. Add environment variable:
+   - `NEXT_PUBLIC_API_URL` = Your backend API URL
+4. Deploy!
+
+### Build for Production
+
+```bash
+npm run build
+npm run start
+```
+
+## Features Overview
+
+### Home Page
+
+- Welcome landing page
+- Navigation to Login and Sign Up
+
+### Sign Up Page
+
+- Email and password validation
+- Real-time form validation
+- API integration with React Query
+- Success/error message handling
+- Auto-redirect to login on success
+
+### Login Page
+
+- Email and password fields
+- Form validation
+- Mock success feedback
+- Simulated login flow
+
+## Form Validation
+
+### Registration Requirements
+
+- Email must be valid format
+- Password must be:
+  - At least 8 characters
+  - Contain uppercase letter
+  - Contain lowercase letter
+  - Contain number (0-9)
+  - Contain special character (@$!%\*?&#)
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+MIT
